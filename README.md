@@ -8,4 +8,6 @@ All the pins have been broken out to separate header pins, so that the same boar
 
 I've included all the tech docs I have here too.
 
-3D render and CAD download here: 
+3D render and CAD download [here](https://a360.co/3l4JOM3)
+
+![Render](./images/render.png?raw=true)
