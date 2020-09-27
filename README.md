@@ -6,4 +6,6 @@ The small connector is too small to hand solder, so this must be reflowed, but a
 
 All the pins have been broken out to separate header pins, so that the same board can be used for other displays using the same connector, in case the pinouts are different!
 
+I've included all the tech docs I have here too.
+
 3D render and CAD download here: 
