@@ -10,4 +10,4 @@ I've included all the tech docs I have here too.
 
 3D render and CAD download [here](https://a360.co/3l4JOM3)
 
-![Render](./images/render.png?raw=true)
+![Render](./images/render.jpg?raw=true)
