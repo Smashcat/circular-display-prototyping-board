@@ -1,0 +1,29 @@
+# Syntax Coloring Map For GC9A01 Library
+
+# Datatypes (KEYWORD1)
+GC9A01				KEYWORD1
+RenderBuffer		KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+setDisplayEnable	KEYWORD2
+setDisplayWindow	KEYWORD2
+drawFrame			KEYWORD2
+clearBuffer			KEYWORD2
+fillRect			KEYWORD2
+fillTriangle		KEYWORD2
+drawSpriteImg		KEYWORD2
+setRenderType		KEYWORD2
+setRenderTarget		KEYWORD2
+setMergeAmount		KEYWORD2
+setRenderPaletteIndex	KEYWORD2
+setTargetBuffer		KEYWORD2
+getColor16			KEYWORD2
+copyBufferToBuffer	KEYWORD2
+scaleBufferToBuffer	KEYWORD2
+copyBufferToDisplay	KEYWORD2
+testEffect1			KEYWORD2
+
+
+# Instances (KEYWORD2)
+
+# Constants (LITERAL1)
