@@ -20,6 +20,9 @@
 #define RENDER_TYPE_MERGE				16
 #define RENDER_TYPE_ANTIALIAS			32
 
+#define RENDER_TYPE_FLIP_VERTICAL		64
+#define RENDER_TYPE_FLIP_HORIZONTAL		128
+
 // Commands used to set up registers in the GC9A01 controller
 #define SET_HORIZONTAL_WRITE_WINDOW   	0x2A
 #define SET_VERTICAL_WRITE_WINDOW     	0x2B
@@ -118,11 +121,12 @@ class GC9A01
 	void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);	// Adapted from Adafruit library
 	void drawHLine(int16_t x,int16_t y, uint16_t w,uint16_t color);
 	void drawHLine(int16_t x,int16_t y, uint16_t w);
-	void drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame);
+	void drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame, uint16_t renderDirection=0);						// Draw a frame of a sprite image to the current RenderBuffer
+	void drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t w,uint16_t h,uint16_t frame, uint16_t renderDirection=0);	// Draw a frame of a sprite image, scaled to (w,h) pixels, to the current RenderBuffer
 	void setRenderType(uint16_t r);				// Sets the renderType for subsequent drawing operations
 	void setMergeAmount(uint16_t a);			// Set the strength of the source pixel being merged into the destination buffer when RENDER_TYPE_MERGE is used. Range is 0 to 16 Lower = weaker
 	void setRenderPaletteIndex(uint16_t i);		// Change the render palette for a sprite
-	void setTargetBuffer(RenderBuffer *r);
+	void setTargetBuffer(RenderBuffer *r);		// Sets the RenderBuffer target for subsequent drawing operations (default is the display buffer)
 	
 	// TODO
 	void copyBufferToBuffer(RenderBuffer dest,RenderBuffer src,int16_t destX,int16_t destY,uint16_t transparentColorIndex=9999);

@@ -726,15 +726,15 @@ void GC9A01::drawHLine(int16_t x,int16_t y, uint16_t w){
 		}
 }
 
-void GC9A01::drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame){
-	if(y+s->frameHeight<0 || y>=renderBufferHeight || x+renderBufferWidth<0 || x>=renderBufferWidth)
+void GC9A01::drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame, uint16_t renderDirection){
+	if((y+s->frameHeight)<0 || (y>=renderBufferHeight) || (x+s->frameWidth)<0 || (x>=renderBufferWidth))
 		return;	// Offscreen
 	uint16_t srcLineWidth=(s->frameWidth/8) * s->bpp;
 	uint16_t offset=( srcLineWidth * s->frameHeight * frame);
-	uint16_t w=s->frameWidth;
-	uint16_t h=s->frameHeight;
 	uint16_t fw=s->frameWidth;
 	uint16_t fh=s->frameHeight;
+	uint16_t w=s->frameWidth;
+	uint16_t h=s->frameHeight;
 	int16_t transIndex=s->transparentColorIndex;
 	
 	// If sprite is partially off top/bottom, then work out new src and dest offsets to save wasted cycles
@@ -745,9 +745,7 @@ void GC9A01::drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame
 	}else if(y+fh>renderBufferHeight-1){	// crop bottom
 		h-=((y+fh)-(renderBufferHeight-1));
 	}
-//	Serial.printf("Frame: %i, Offset: %i\n",frame,offset);
 	const uint8_t *src=s->data+offset;
-//	Serial.printf("src: %i\n",(long unsigned int)src);
 	uint16_t *dest=renderBuffer+x+(y*renderBufferWidth);
 	uint8_t srcPos=0;
 	uint16_t color,c;
@@ -843,6 +841,110 @@ void GC9A01::drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t frame
 				dest+=destAdd;
 			}
 		}
+	}
+}
+
+void GC9A01::drawSpriteImg(const SpriteImg *s,int16_t x,int16_t y,uint16_t w,uint16_t h,uint16_t frame, uint16_t renderDirection){
+	if((y+h)<0 || (y>=renderBufferHeight) || (x+w)<0 || (x>=renderBufferWidth) || (w==0) || (h==0))
+		return;	// Offscreen
+	uint16_t srcLineWidth=(s->frameWidth/8) * s->bpp;
+	uint16_t offset=( srcLineWidth * s->frameHeight * frame);	// Start of src data in Sprite 
+	uint16_t fw=s->frameWidth;
+	uint16_t fh=s->frameHeight;
+	int16_t transIndex=s->transparentColorIndex;
+	uint16_t oh=h;
+	int16_t dh=oh;
+
+	// If sprite is partially off top/bottom, then work out new src and dest offsets to save wasted cycles
+	if(y<0){	// crop top
+		for(int16_t n=0;n<-y;n++){
+			dh-=fh;
+			while(dh<=0){
+				dh+=oh;
+				offset+=srcLineWidth;
+			}
+		}
+		h+=y;
+		y=0;
+	}
+	
+	if(y+h>renderBufferHeight-1){	// crop bottom
+		h=renderBufferHeight-y;
+	}
+	
+	const uint8_t *src=s->data+offset;
+	uint16_t *dest=renderBuffer+x+(y*renderBufferWidth);
+	uint8_t srcPos=0;
+	uint16_t color,c;
+	uint8_t mask=bppMask[s->bpp];
+	int16_t destAdd=(renderBufferWidth-w);
+	uint16_t bpp=s->bpp;
+	const uint16_t *currentPalette=s->palette+(renderPaletteIndex*s->paletteSize);
+
+	uint16_t clipLeft=(x<0?-x:0);
+	uint16_t clipRight=w-(x+w>=renderBufferWidth?((x+w)-(renderBufferWidth-1)):0);
+	if(renderType==RENDER_TYPE_MERGE){
+		uint16_t antiMergeAmt=16-mergeAmt;
+		uint16_t nB,nG,nR,pC,bC;
+		for(uint16_t y=0;y<h;y++){
+			const uint8_t *srcL = src;
+			int16_t dw=w;
+			for(uint16_t x=0;x<w;x++){
+				c=(*srcL>>srcPos)&mask;
+				dw-=fw;
+				while(dw<=0){
+					srcPos+=bpp;
+					if(srcPos==8){
+						++srcL;
+						srcPos=0;
+					}
+					dw+=w;
+				}
+				if(x>=clipLeft && x<=clipRight && c!=transIndex){
+					bC=*dest;
+					pC=currentPalette[c];
+					nB=( ((pC&31)*mergeAmt) + ((bC&31)    		   * antiMergeAmt) ) >>4;
+					nG=( (((pC>>5)&63)*mergeAmt) + (((bC>>5)& 63)  * antiMergeAmt) ) >>4;
+					nR=( (((pC>>11)&31)*mergeAmt) + (((bC>>11)&31) * antiMergeAmt) ) >>4;
+					*dest=(nR<<11)+(nG<<5)+nB;
+				}
+				++dest;
+			}
+			dest+=destAdd;
+			dh-=fh;
+			while(dh<=0){
+				dh+=oh;
+				src+=srcLineWidth;
+			}
+		}
+
+	}else{
+		for(uint16_t y=0;y<h;y++){
+			const uint8_t *srcL = src;
+			int16_t dw=w;
+			for(uint16_t x=0;x<w;x++){
+				c=(*srcL>>srcPos)&mask;
+				dw-=fw;
+				while(dw<=0){
+					srcPos+=bpp;
+					if(srcPos==8){
+						++srcL;
+						srcPos=0;
+					}
+					dw+=w;
+				}
+				if(x>=clipLeft && x<=clipRight && c!=transIndex)
+					*dest=currentPalette[c];
+				++dest;
+			}
+			dest+=destAdd;
+			dh-=fh;
+			while(dh<=0){
+				dh+=oh;
+				src+=srcLineWidth;
+			}
+		}
+		
 	}
 }
 
